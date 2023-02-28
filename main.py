@@ -34,7 +34,7 @@ model = tf.saved_model.load('vgg-16')
 
 
 # Function for returning the prediction of image 
-def predict_image(content):
+def predict_image(image):
     # Preprocessing part goes here
     image = cv2.imread(image)
     image = cv2.resize(image, IMG_SIZE)

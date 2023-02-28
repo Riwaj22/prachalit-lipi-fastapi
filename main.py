@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, UploadFile, File
 import uvicorn
 import tensorflow as tf
 from tensorflow import keras
@@ -36,7 +36,6 @@ model = tf.saved_model.load('vgg-16')
 # Function for returning the prediction of image 
 def predict_image(content):
     # Preprocessing part goes here
-    image = Image.open(io.BytesIO(content))
     image = cv2.imread(image)
     image = cv2.resize(image, IMG_SIZE)
     # image = image.astype('float32') / 255.0
@@ -45,7 +44,7 @@ def predict_image(content):
     output = model.predict(image)
     predicted_class = np.argmax(output)
 
-    return char_map[predicted_class]
+    return str(char_map[predicted_class])
 
 # Defining the FastAPI instance here
 app = FastAPI()
@@ -55,9 +54,12 @@ async def root_func():
     return {'message': 'this is the root function'}
 
 @app.post('/predict_image')
-async def upload_image(image: UploadFile):
+async def upload_image(file: UploadFile = File()):
+    content = await file.read()
+    image = Image.open(io.BytesIO(content)).convert('RGB')
+    
     try:
-        result = predict_image(await image.read())
+        result = predict_image(image)
     except Exception as e:
         print(e) 
         result = "null"

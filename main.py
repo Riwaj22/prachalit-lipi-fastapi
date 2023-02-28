@@ -2,8 +2,10 @@ from fastapi import FastAPI, UploadFile
 import uvicorn
 import tensorflow as tf
 from tensorflow import keras
+from PIL import Image
 import numpy as np
 import cv2
+import io
 
 # Some constants to be used in the program
 IMG_SIZE = (32,32)
@@ -23,7 +25,6 @@ char_map = {
 }
 
 
-
 # Importing the model
 model = tf.saved_model.load('vgg-16')
 
@@ -33,8 +34,9 @@ model = tf.saved_model.load('vgg-16')
 
 
 # Function for returning the prediction of image 
-def predict_image(image):
+def predict_image(content):
     # Preprocessing part goes here
+    image = Image.open(io.BytesIO(content))
     image = cv2.imread(image)
     image = cv2.resize(image, IMG_SIZE)
     # image = image.astype('float32') / 255.0
